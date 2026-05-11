@@ -1,2 +1,2 @@
 # suporter
-Suporter available app
+Suporter available app 1.0.0
