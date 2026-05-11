@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Supervisor{% endblock %}
+{% block content %}
+
+<div class="dashboard-wrap">
+  <div class="dashboard-header">
+    <div>
+      <h2 class="page-title">Todos os Técnicos</h2>
+      <p class="page-sub">Visão geral dos técnicos em tempo real</p>
+    </div>
+    <div class="dashboard-stats">
+      <div class="stat">
+        <span class="stat-num" id="total-count">{{ tecnicos|length }}</span>
+        <span class="stat-label">Técnicos</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num stat-green" id="disp-count">
+          {{ tecnicos | selectattr('status', 'equalto', 'disponivel') | list | length }}
+        </span>
+        <span class="stat-label">Disponíveis</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num stat-amber" id="atend-count">
+          {{ tecnicos | selectattr('status', 'equalto', 'em_atendimento') | list | length }}
+        </span>
+        <span class="stat-label">Em atendimento</span>
+      </div>
+    </div>
+  </div>
+
+  <!--Grid tecnicos-->
+  <div class="tecnico-grid" id="tecnico-grid">
+    {% for t in tecnicos %}
+    <div class="tecnico-card {{ t.status }}" data-id="{{ t.id }}">
+      <div class="card-status-bar"></div>
+      <div class="card-body">
+        <div class="card-id">#{{ t.id }}</div>
+        <div class="card-name">{{ t.name }}</div>
+        <div class="card-meta">
+          <span class="badge-status {{ t.status }}">
+            {% if t.status == 'disponivel' %}Disponível{% else %}Em Atendimento{% endif %}
+          </span>
+          <div>
+            
+          </div>
+          <p> 
+          <span class="card-chamados">{{ t.qtd_chamados }} chamado{{ 's' if t.qtd_chamados != 1 }}</span>
+          </p>
+
+        </div>
+      </div>
+      <div class="card-actions">
+
+        <!-- Editar -->
+        <button class="btn-icon btn-edit" title="Editar"
+          onclick="openEditModal({{ t.id }}, '{{ t.name }}')">✎</button>
+
+        <!-- Delete-->
+        <form method="POST"
+          action="{{ url_for('supervisor_deletar_tecnico', tecnico_id=t.id) }}"
+          onsubmit="return confirm('Remover {{ t.name }}?')">
+          <button type="submit" class="btn-icon btn-del" title="Remover">✕</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <p class="empty-state">Nenhum técnico cadastrado.</p>
+    {% endfor %}
+  </div>
+
+  <!--add tecnico-->
+  <section class="add-section">
+    <h3 class="section-title">Adicionar Técnico</h3>
+    <form class="inline-form" method="POST"
+      action="{{ url_for('supervisor_adicionar_tecnico') }}">
+      <input type="text"   name="name"  placeholder="Nome completo" required />
+      <input type="password" name="senha" placeholder="Senha inicial"  required />
+      <button type="submit" class="btn-primary btn-sm">+ Adicionar</button>
+    </form>
+  </section>
+
+</div>
+
+<!--edit-->
+<div class="modal-overlay" id="modal-edit" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <span>Editar Técnico</span>
+      <button onclick="closeModal()" class="btn-icon">✕</button>
+    </div>
+    <form id="edit-form" method="POST">
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" name="name" id="edit-name" required />
+      </div>
+      <div class="field">
+        <label>Nova Senha <small>(deixe em branco para manter)</small></label>
+        <input type="password" name="senha" id="edit-senha" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal()" class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // modal
+  function openEditModal(id, name) {
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-form').action = `/supervisor/tecnico/${id}/editar`;
+    document.getElementById('modal-edit').hidden = false;
+  }
+  function closeModal() {
+    document.getElementById('modal-edit').hidden = true;
+  }
+
+  //refresh os cards a cada 10s ─
+  async function refreshGrid() {
+    try {
+      const res  = await fetch('/api/tecnicos');
+      const data = await res.json();
+
+      let disp = 0, atend = 0;
+      data.forEach(t => {
+        const card = document.querySelector(`.tecnico-card[data-id="${t.id}"]`);
+        if (!card) return;
+        card.className = `tecnico-card ${t.status}`;
+        card.querySelector('.badge-status').className = `badge-status ${t.status}`;
+        card.querySelector('.badge-status').textContent =
+          t.status === 'disponivel' ? 'Disponível' : 'Em Atendimento';
+        card.querySelector('.card-chamados').textContent =
+          `${t.qtd_chamados} chamado${t.qtd_chamados !== 1 ? 's' : ''}`;
+        if (t.status === 'disponivel') disp++; else atend++;
+      });
+
+      document.getElementById('disp-count').textContent  = disp;
+      document.getElementById('atend-count').textContent = atend;
+    } catch(e) { /* silencioso */ }
+  }
+
+  setInterval(refreshGrid, 10000);
+</script>
+{% endblock %}

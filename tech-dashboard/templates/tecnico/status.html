@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Status — {{ tecnico.name }}{% endblock %}
+{% block content %}
+<div class="tecnico-wrap">
+
+  <div class="tecnico-profile">
+    <div class="tecnico-avatar">{{ tecnico.name[0].upper() }}</div>
+    <h2 class="tecnico-name">{{ tecnico.name }}</h2>
+    <span class="tecnico-id">ID #{{ tecnico.id }}</span>
+  </div>
+
+  <!--Status-->
+  <div class="status-card">
+    <p class="status-label">Status</p>
+    <span class="status-pill {{ tecnico.status }}" id="status-display">
+      {% if tecnico.status == 'disponivel' %}Técnico Disponível{% else %}Técnico em Atendimento{% endif %}
+    </span>
+  </div>
+
+  <!-- btn status-->
+  <div class="status-buttons">
+    <button
+      class="btn-status {% if tecnico.status == 'disponivel' %}active{% endif %}"
+      id="btn-disp"
+      onclick="setStatus('disponivel')">Disponível
+    </button>
+
+    <button
+      class="btn-status btn-atend {% if tecnico.status == 'em_atendimento' %}active{% endif %}"
+      id="btn-atend"
+      onclick="setStatus('em_atendimento')">
+      Em Atendimento
+    </button>
+  </div>
+
+  <!--chamados-->
+  <div class="chamados-card">
+    <p class="chamados-label">Chamados Abertos</p>
+    <div class="chamados-control">
+      <button class="btn-count" onclick="changeChamados(-1)">−</button>
+      <span class="chamados-num" id="chamados-num">{{ tecnico.qtd_chamados }}</span>
+      <button class="btn-count" onclick="changeChamados(1)">+</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentStatus   = "{{ tecnico.status }}";
+  let currentChamados = {{ tecnico.qtd_chamados }};
+
+  async function sendUpdate(payload) {
+    const body = new URLSearchParams(payload);
+    await fetch("{{ url_for('tecnico_atualizar_status') }}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body
+    });
+  }
+
+  function setStatus(status) {
+    currentStatus = status;
+
+    const pill     = document.getElementById('status-display');
+    const btnDisp  = document.getElementById('btn-disp');
+    const btnAtend = document.getElementById('btn-atend');
+
+    pill.className  = `status-pill ${status}`;
+    pill.textContent = status === 'disponivel' ? 'Técnico Disponível' : 'Técnico em Atendimento';
+
+    btnDisp.classList.toggle('active',  status === 'disponivel');
+    btnAtend.classList.toggle('active', status === 'em_atendimento');
+
+    sendUpdate({ status });
+  }
+
+  function changeChamados(delta) {
+    currentChamados = Math.max(0, currentChamados + delta);
+    document.getElementById('chamados-num').textContent = currentChamados;
+    sendUpdate({ qtd_chamados: currentChamados });
+  }
+</script>
+{% endblock %}
