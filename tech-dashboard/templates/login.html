@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Login - Suporter{% endblock %}
+{% block content %}
+
+<div class="login-wrap">
+  <div class="login-brand">
+    <span class="brand-hex">⬡</span>
+    <h1 class="brand-title">Supo<span>rter</span></h1>
+    <p class="brand-sub">Sistema de Monitoramento Técnico</p>
+  </div>
+  
+  <form class="login-form" method="POST" action="{{ url_for('login') }}">
+    <div class="role-toggle">
+      <label class="role-option">
+        <input type="radio" name="role" value="supervisor" checked />
+        <span>Supervisor</span>
+      </label>
+      <label class="role-option">
+        <input type="radio" name="role" value="tecnico" />
+        <span>Técnico</span>
+      </label>
+    </div>
+    
+    <div class="field">
+      <label for="id">ID</label>
+      <input type="text" id="id" name="id" placeholder="Seu número de ID" required />
+    </div>
+    
+    <div class="field">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" required />
+    </div>
+    
+    <button type="submit" class="btn-primary">Entrar</button>
+  </form>
+</div>
+
+{% endblock %}
