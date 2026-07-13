@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mariadb:latest
+    container_name: mariadb_container
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: "891212"
+      MARIADB_DATABASE: tech_dashboard
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  web:
+    build: .
+    container_name: flask_container
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MARIADB_HOST=db
+      - MARIADB_PORT=3306
+      - MARIADB_USER=root
+      - MARIADB_PASSWORD=891212
+      - MARIADB_DB=tech_dashboard
+    depends_on:
+      - db
+
+volumes:
+  mariadb_data:
