@@ -1,9 +1,3 @@
-"""
-setup_db.py
------------
-Cria o banco de dados e as tabelas necessárias para o Suporter.
-"""
-
 import sys
 import time
 import pymysql
@@ -34,8 +28,14 @@ INSERT IGNORE INTO supervisores (id, name, senha) VALUES
     (1, 'Admin', 'admin123');
 
 INSERT IGNORE INTO tecnicos (id, name, senha, status, qtd_chamados) VALUES
-    (1, 'Técnico 01', 'tec123', 'disponivel', 0),
-    (2, 'Técnico 02', 'tec123', 'disponivel', 0);
+    (1, 'Rogerio', 'tec123', 'disponivel', 0),
+    (2, 'Davi', 'tec123', 'disponivel', 0),
+    (3, 'Yago', 'tec123', 'disponivel', 0),
+    (4, 'Lucas_Bruce', 'tec123', 'disponivel', 0),
+    (5, 'Nelson', 'tec123', 'disponivel', 0),
+    (6, 'Romildo', 'tec123', 'disponivel', 0),
+    (7, 'Leiber', 'tec123', 'disponivel', 0),
+    (8, 'Janderlei', 'tec123', 'disponivel', 0);
 """
 
 def run():
